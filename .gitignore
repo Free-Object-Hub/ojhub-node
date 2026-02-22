@@ -2,3 +2,6 @@ node_modules
 fuck.js
 GeoLite2-City.mmdb
 run.ps1
+public/imgs/customuser
+public/imgs/customnews
+public/imgs/customwiki
