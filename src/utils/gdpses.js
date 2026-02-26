@@ -16,7 +16,11 @@ export class Gdps {
 		if (links.includes('\\"'))
 			links = links.replace(/\\"/g, '"');
 		if (links.startsWith('{'))
-			links = JSON.parse(links);
+			try {
+				links = JSON.parse(links);
+			} catch(e) {
+				links = links;
+			}
 
 		return {
 			ID: this.ID,
@@ -290,7 +294,7 @@ export class Wikis {
 				this.disls
 			],
 			forumId: this.forumId,
-			mainWiki: this.getMainPage()
+			mainWiki: this.mainWiki
 		};
 	}
 
