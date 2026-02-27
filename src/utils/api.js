@@ -13,7 +13,7 @@ export { Gdps, Owners, Content, Guides, Wikis, Vacans, Applies } from './gdpses.
 export { Comments, News } from './comments.js';
 export { NewGdpsFinder, createBitmask, vacansAppliesReader, liketype, channelsCommsToLikes, checkLike, likeSet, removeLike } from './search.js';
 export { Alarms } from './alarms.js';
-export { HELPER_VER, HELPER_URL, GDPSswitchChannel, time, TGwebhookLog, parseFormData, channelsObjsToComm, CH } from './other.js';
+export { HELPER_VER, HELPER_URL, GDPSswitchChannel, time, validateEmail, TGwebhookLog, parseFormData, channelsObjsToComm, CH } from './other.js';
 export { exploitPatch } from './security.js';
 
 let failUser = {

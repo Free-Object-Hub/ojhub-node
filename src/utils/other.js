@@ -17,6 +17,10 @@ export function time() {
 	return Math.floor(Date.now() / 1000);
 };
 
+export function validateEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
 export async function TGwebhookLog(msg) {
 	const message = `${msg}\n\n${HELPER_VER}`;
 	const resp1 = false;

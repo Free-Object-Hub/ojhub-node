@@ -1,5 +1,6 @@
 import { query, ramDB } from './api.js';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export class User {
 	constructor(data = {}) {
@@ -112,6 +113,19 @@ export class Users {
 
 		return new User(user[0]);
 	}
+	
+	static async hasUsed(email, username) {
+		let reallyUser = await query('SELECT userId FROM `users` WHERE `mail` = ? OR `username` = ? LIMIT 1', [email, username])
+		return reallyUser[0]?.userId || 0;
+	}
+
+	static async newUserToken(username, password, email, activated, token, priority = 0) {
+		let hash = bcrypt.hashSync(password, 10),
+		quer = 'INSERT INTO users (username, password, mail, code, token, priority) VALUES (?, ?, ?, ?, ?, ?)',
+		exec = [username,hash,email,activated,token,priority];
+		let user = await query(quer, exec);
+        return user && user.insertId ? [token,user.insertId] : null;
+	}
 
 	static async setNickname(userId, name) {
 		const userName = await Promise.all([
@@ -131,7 +145,6 @@ export class Users {
 		const socials2 = await query('UPDATE users SET socials = ? WHERE userId = ?', [socials, userId]);
 		return socials2.affectedRows;
 	}
-
 
 	static randomString(length) {
 		return crypto.randomBytes(length).toString('hex').slice(0, length);
