@@ -26,7 +26,7 @@ export async function add(server, url) {
 
 			const news = await News.NEWSpost(uId, gId, text, time(), title, gdps.checked, ext);
 			if (files.files) {
-				let filename = `${process.env.IMGS}imgs/customnews/${news}.${ext}`;
+				let filename = `${process.env.IMGS}customnews/${news}.${ext}`;
 				fs.writeFile(filename, files.files.buffer);
 			}
 			TGwebhookLog(`NEW NEWS ${news} with name ${title}:\n${text}`);
