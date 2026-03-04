@@ -1,4 +1,4 @@
-import { TGwebhookLog, Comments, Auth, time } from '../../utils/api.js';
+import { TGwebhookLog, Comments, Auth, time, exploitPatch } from '../../utils/api.js';
 
 export async function send(server, url) {
 	server.route({
@@ -9,13 +9,19 @@ export async function send(server, url) {
 			const b = request.body;
 			if (b.type == 1)
 				b.type = 0;
+			const ID = parseInt(b.ide); 
+			if (!ID)
+				return reply.code(400);
+			const textPre = exploitPatch(b.text);
+			const text = Buffer.from(textPre,'utf8').toString('base64')
+			const type = parseInt(b.type) || 0;
 			if (b.text?.length > 10) {
 				await Comments.addComment(
 					request.user.userId,
-					b.ide,
-					Buffer.from(b.text,'utf8').toString('base64'),
+					ID,
+					text,
 					time(),
-					b.type
+					type
 				);
 				TGwebhookLog(`NEW COMMENT UNDER ${b.ide}/${b.type}, text:\n\n${b.text}`);
 			}

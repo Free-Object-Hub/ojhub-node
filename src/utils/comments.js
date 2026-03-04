@@ -1,3 +1,4 @@
+import { getOutlookEdition } from 'ua-parser-js/helpers';
 import { GDPSswitchChannel, query, queryOne, CH, ramDB } from './api.js';
 
 export class Comments {
@@ -90,7 +91,7 @@ export class News {
 			text: text,
 			author: this.userId,
 			username: this.uNickname || this.uUsername || '???',
-			gdpsId: gdpsId,
+			gdpsId: gdpsId || 0,
 			gdpsTitle: this.gTitle || '???',
 			date: this.date,
 			likes: [
@@ -105,7 +106,8 @@ export class News {
 
 	static async fetchAllNews(page = 0) {
 		let sql = 'SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.channel as gChannel '+
-			'FROM news n LEFT JOIN users u ON n.userId = u.userId LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
+			'FROM news n LEFT JOIN users u ON n.userId = u.userId '+
+			'LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
 			'ORDER BY n.ID DESC LIMIT 11',
 			exec = [];
 		if (typeof page == 'number' && page > 0) {
@@ -140,11 +142,12 @@ export class News {
 		return new News(news[0]);
 	}
 
-	static async NEWSpost(userId, ID, text, date = 0, title = '') {
-		return await query(
-			'INSERT INTO `news` (`userId`, `gdpsId`, `date`, `title`, `text`) VALUES (?,?,?,?,?)',
-			[userId, ID, date, title, text]
+	static async NEWSpost(userId, ID, text, date = 0, title = '', checked = 0, hasFile = '') {
+		const news = await query(
+			'INSERT INTO news (userId, gdpsId, date, title, text, checked, hasFile) VALUES (?,?,?,?,?,?,?)',
+			[userId, ID, date, title, text, checked, hasFile]
 		)
+		return news.insertId;
 	}
 
 	static async deleteNews(ID) {

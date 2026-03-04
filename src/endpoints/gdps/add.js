@@ -75,15 +75,15 @@ export async function add(server, url) {
 			}
 			if (files.img) {
 				let ext = files.img.filename.split('.').pop().toLowerCase();
-				fileNames.img = `${process.env.IMGS}customuser/i${gdpsId}.${ext}`;
+				fileNames.img = `${process.env.IMGS}imgs/customuser/i${gdpsId}.${ext}`;
 				uploFiles.push(fs.writeFile(fileNames.img, files.img.buffer));
-				fileNames.img = `${HELPER_URL}customuser/i${gdpsId}.${ext}`;
+				fileNames.img = `${HELPER_URL}imgs/customuser/i${gdpsId}.${ext}`;
 			}
 			if (files.ban) {
 				let ext = files.ban.filename.split('.').pop().toLowerCase();
-				fileNames.ban = `${process.env.IMGS}customuser/b${gdpsId}.${ext}`;
+				fileNames.ban = `${process.env.IMGS}imgs/customuser/b${gdpsId}.${ext}`;
 				uploFiles.push(fs.writeFile(fileNames.ban, files.ban.buffer));
-				fileNames.ban = `${HELPER_URL}customuser/b${gdpsId}.${ext}`;
+				fileNames.ban = `${HELPER_URL}imgs/customuser/b${gdpsId}.${ext}`;
 			}
 			uploFiles.push(Gdps.refreshAvatar(
 				gdpsId, 
