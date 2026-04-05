@@ -136,9 +136,16 @@ export class News {
 	}
 
 	static async fetchById(ID) {
+		let gCache = await ramDB.g('newsIdCache:'+ID);
+		if (gCache)
+			return new News(gCache);
+
 		const news = await query('SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.channel as gChannel '+
 			'FROM news n LEFT JOIN users u ON n.userId = u.userId LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
 			'WHERE n.ID = ?', [ID])
+
+		if (!gCache) await ramDB.s('newsIdCache:'+ID, news[0]);
+
 		return new News(news[0]);
 	}
 

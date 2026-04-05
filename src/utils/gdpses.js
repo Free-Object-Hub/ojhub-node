@@ -1,5 +1,5 @@
 import { applies } from '../endpoints/vacans/applies.js';
-import { query, Users, User } from './api.js';
+import { ramDB, query, Users, User } from './api.js';
 
 export class Gdps {
 	constructor(data = {}) {
@@ -69,7 +69,14 @@ export class Gdps {
 	}
 
 	static async fetchById(ID) {
+		let gCache = await ramDB.g('gdpsIdCache:'+ID);
+		if (gCache)
+			return new Gdps(gCache);
+
 		const gdps = await query('SELECT * FROM `gdpses` WHERE `ID` = ?', [ID]);
+
+		if (!gCache) await ramDB.s('gdpsIdCache:'+ID, gdps[0]);
+
 		return new Gdps(gdps[0]);
 	}
 
@@ -319,7 +326,14 @@ export class Wikis {
 	}
 
 	static async fetchById(ID) {
+		let gCache = await ramDB.g('wikiIdCache:'+ID);
+		if (gCache)
+			return new Wikis(gCache);
+
 		const wiki = await query('SELECT * FROM `wikis` WHERE `ID` = ?', [ID]);
+
+		if (!gCache) await ramDB.s('wikiIdCache:'+ID, wiki[0]);
+
 		return new Wikis(wiki[0]);
 	}
 
@@ -401,6 +415,18 @@ export class Vacans {
 			gChannel: this.gChannel,
 			gTitle: this.gTitle
 		};
+	}
+
+	static async fetchById(ID) {
+		let gCache = await ramDB.g('vacsIdCache:'+ID);
+		if (gCache)
+			return new Vacans(gCache);
+
+		const gdps = await query('SELECT * FROM `vacans` WHERE `ID` = ?', [ID]);
+
+		if (!gCache) await ramDB.s('vacsIdCache:'+ID, gdps[0]);
+
+		return new Vacans(gdps[0]);
 	}
 
 	static async fetchVacanById(vacId, userId = 0) {

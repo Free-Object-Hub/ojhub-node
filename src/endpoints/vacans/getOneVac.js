@@ -20,7 +20,7 @@ export async function get(server, url) {
 
 			const json = {
 				gdps: {
-                    ['v'+vacs.ID]: vacs.renderVacanMini()
+                    ['v'+vacs.ID]: vacs.renderVacan()
                 },
 				comments: {},
 			};

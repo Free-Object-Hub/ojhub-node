@@ -17,16 +17,21 @@ export async function vacansAppliesReader(request, reply, vacansData) {
 		return vacansData;
 	const uId = request.uId;
 
+    if (!uId)
+        return vacansData;
+
 	if (vacansData.length == 0)
 		return vacansData;
 
 	const vacsIds = [];
-	for (let v in vacansData) {
+	for (let v in vacansData)
 		vacsIds.push(vacansData[v].ID);
-	}
 
 	let quer = `SELECT vacId,ID FROM vacsApplies WHERE vacId IN (${vacsIds.map(()=>'?').join(',')}) AND userId = ?`,
 		exec = [...vacsIds, uId];
+    console.log(quer, exec);
+    if (vacsIds.length === 0)
+        return [];
 	const appliesPre = await query(quer, exec);
 
 	for (let e of appliesPre) {
