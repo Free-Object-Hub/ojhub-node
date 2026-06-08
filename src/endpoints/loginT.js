@@ -19,7 +19,7 @@ export function likesT(server, url) {
 	server.route({
 		method: ['GET'],
 		url: url,
-		preHandler: [Auth.requireDevice],
+		preHandler: [Auth.requireDeviceNoVerify],
 		handler: async (request, reply) => {
 			const cache = await ramDB.g(`likes:${request.user.userId}`)
 			if (cache)
@@ -43,6 +43,9 @@ export function likesT(server, url) {
 			const newD = {};
 			for (let i in lt2)
 				newD[lt2[i]] = [];
+
+			if (request.user.activated == 0)
+				return newD;
 
 			const likesD = await query(
 				`SELECT * FROM likes WHERE userId = ? ORDER BY channel ASC`,

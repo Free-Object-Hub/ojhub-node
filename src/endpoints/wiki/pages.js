@@ -1,4 +1,4 @@
-import { ramDB, Guides, Wikis, Comments } from "../../utils/api.js";
+import { ramDB, Guides, Wikis, Comments, WikiTemp } from "../../utils/api.js";
 
 export async function guides(server, url) {
 	server.route({
@@ -51,13 +51,31 @@ export async function guide(server, url) {
 			const [wiki, guide, comms] = await Promise.all([
 				Wikis.fetchById(request.query.wiki),
 				Guides.fetchById(gId),
-				Comments.getComments(2,gId,page),
+				Comments.getComments(2,gId),
 			]);
 
 			const Json = Object.assign(
 				guide.renderGuide(wiki.colors),
-				{comments:{}}
-			);
+				{
+					comments:{},
+					templates:{},
+				}
+			); 
+
+			if (guide.templates != '') {
+				let templates = guide.templates.split(',');
+				if (templates.length === 1) {
+					let templatesDone = await WikiTemp.getOneTemplateByWiki(guide.wikiChannel, guide.templates);
+					Json.templates[templatesDone.name] = templatesDone.renderTemplate();
+				} else {
+					let templatesDone = await WikiTemp.getTemplatesByWiki(guide.wikiChannel, templates);
+					templatesDone.forEach(t=>{
+						Json.templates[t.name] = t.renderTemplate();
+					})
+				}
+			}
+		
+
 			for (const el of comms)
 				Json.comments['c'+el.ID] = el.COMMrender();
 

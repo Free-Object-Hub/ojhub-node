@@ -45,6 +45,7 @@ export class Device {
 
 	static async addDevice(userId, uAgent, ip, country, city, platform, browser, staticFp, dynamicFp) {
 		const data = await query('INSERT INTO `devices` (`userId`, `userAgent`, `ip`, `country`, `city`, `platform`, `browser`, `staticFp`, `dynamicFp`) VALUES (?,?,?,?,?,?,?,?,?)', [userId, uAgent, ip, country, city, platform, browser, staticFp, dynamicFp]);
+		console.log(data);
 		return data.insertId > 0;
 	}
 

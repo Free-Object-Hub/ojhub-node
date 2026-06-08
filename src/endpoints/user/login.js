@@ -3,6 +3,7 @@ import { UAParser } from 'ua-parser-js';
 import crypto from 'crypto';
 
 async function verifyRecaptcha(recaptchaResponse, remoteIp) {
+	return Promise.resolve({success:true});
 	const url = 'https://www.google.com/recaptcha/api/siteverify';
 	
 	const params = new URLSearchParams({
@@ -84,15 +85,17 @@ export function register(server, url) {
 			if (!cap.success)
 				return '-3';
 			let username = exploitPatch(b.username),
-				email = exploitPatch(b.email),
-				token = crypto.createHash('sha256')
-    				.update(Users.randomString(16) + username)
-    				.digest('hex');
+				email = exploitPatch(b.email);
+
 			if (!validateEmail(email))
 				return '-1';
 			const check = await Users.hasUsed(email, username);
 			if (check > 0)
 				return '-2';
+
+			let token = crypto.createHash('sha256')
+    			.update(Users.randomString(16) + username)
+    			.digest('hex');
 
 			let user = await Users.newUserToken(
 				username,
@@ -101,17 +104,19 @@ export function register(server, url) {
 				1,
 				token
 			);
+			// [token, insertId]
 
 			const deviceData = await Device.easyCheckDevice(user[1], b['device']);
+			console.log(deviceData);
 			if (!deviceData) {
-				const [country, city] = getCity(request.ip);
+				const [country, city] = await getCity(request.ip);
 
 				const parser = new UAParser();
 				const dd = parser.setUA(ua).getResult();
 				const br = dd.browser;
 				const os = dd.os;
 
-				await Device.addDevice(
+				let resp = await Device.addDevice(
 					user[1],
 					ua,
 					request.ip,
@@ -122,6 +127,7 @@ export function register(server, url) {
 					b['device'], 
 					b['deviceDynamic']
 				);
+			console.log(resp);
 			}
 			return await loginToken(request.ip, user[0], b['device'], true);
 		}

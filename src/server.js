@@ -124,8 +124,11 @@ fastify.route({
 	}
 });
 
-for (let e in allEndpoints)
-	allEndpoints[e](fastify, e.replaceAll('_', ''));
+for (let e in allEndpoints) {
+	let ling = e.replaceAll('_', '')
+	allEndpoints[e](fastify, ling);
+	console.log(ling, allEndpoints[e]);
+}
 console.log(`=> Endpoints done`);
 
 //const __filename = fileURLToPath(import.meta.url);

@@ -192,8 +192,7 @@ export class Owners {
 	}
 }
 
-export class Content {
-}
+export class Content {}
 
 export class Guides {
 	constructor(data = {}) {
@@ -242,13 +241,11 @@ export class Guides {
 		}
 	}
 
-	static async fetchByWiki(wikiId, page = 0) {
+	static async fetchByWiki(wikiId, page = 0, pohuiDostawai = true) {
 		const offset = page * 8;
-		let sql = 'SELECT * FROM `guides` WHERE `checked` = 1 AND `wikiChannel` = ? ORDER BY `ID` DESC LIMIT 9 OFFSET ?',
+		let sql = `SELECT * FROM guides WHERE ${pohuiDostawai ? 'checked = 1 AND' : ''} wikiChannel = ? ORDER BY ID DESC LIMIT 9 OFFSET ?`,
 		exec = [wikiId, offset];
-		console.log(sql, exec);
 		let guides = await query(sql, exec);
-		console.log(guides)
 		return guides.map(el => new Guides(el));
 	}
 
@@ -257,6 +254,17 @@ export class Guides {
 		return new Guides(guid[0]);
 	}
 
+	static async fetchWikiWithPerms(gdpsId, userId) {
+		const gdps = await query(`SELECT g.*, CASE 
+			WHEN g.author = ? THEN 2
+			WHEN EXISTS				(SELECT 1 FROM soowners so WHERE so.gdpsId = g.ID AND so.userId = ?) THEN 1
+			ELSE 0 END as perms
+			FROM gdpses g WHERE g.ID = ?`,
+			[userId, userId, gdpsId]
+		);
+		return gdps[0];
+	}
+	
 	static async uploadGuide(userId, title, aftertext, guidetext, language, img, date) {
 		const guid = await query(
 			'INSERT INTO `guides` (`userId`, `title`, `aftertext`, `guidetext`, `language`, `date`, `img`) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -325,6 +333,17 @@ export class Wikis {
 		};
 	}
 
+	static async fetchWikiWithPerms(gdpsId, userId) {
+		const gdps = await query(`SELECT g.*, CASE 
+			WHEN g.userId = ? THEN 2
+			WHEN EXISTS				(SELECT 1 FROM wikisoowners so WHERE so.wikiId = g.ID AND so.userId = ?) THEN 1
+			ELSE 0 END as perms
+			FROM wikis g WHERE g.ID = ?`,
+			[userId, userId, gdpsId]
+		);
+		return gdps[0];
+	}
+
 	static async fetchById(ID) {
 		let gCache = await ramDB.g('wikiIdCache:'+ID);
 		if (gCache)
@@ -358,6 +377,79 @@ export class Wikis {
 		});
 
 		return [ownedWikis, soownWikis];
+	}
+}
+
+export class WikiTemp {
+	/*
+	public int $ID;
+	public int $wikiId;
+	public string $name;
+	public string $args;
+	public string $method;
+	public string $content;
+	*/
+	constructor(data = {}) {
+		Object.assign(this, data);
+	}
+
+	static async getOneTemplateByWiki(wikiId, template) {
+		let sql = await query('SELECT * FROM `wikiTemplates` WHERE `wikiId` = ? AND name = ?', [wikiId, template]);
+
+		return new WikiTemp(sql[0]);
+	}
+
+	static async getTemplatesByWiki(wikiId, templates) {
+		let sql = 'SELECT * FROM `wikiTemplates` WHERE `wikiId` = ? AND name IN (',
+		exec = [wikiId],
+		query2 = [];
+		templates.forEach(t=>{
+			query2.push('?')
+			exec.push(t)
+		});
+		let doneSql = sql + query2.join(',') + ')';
+
+		let data = await query(doneSql, exec);
+		return data.map(e=> new WikiTemp(e));
+	}
+
+	static async getAllTemplatesByWiki(wikiId, page = 0) {
+		let sql = 'SELECT * FROM `wikiTemplates` WHERE `wikiId` = ? ORDER BY `ID` DESC LIMIT 11',
+		exec = [wikiId];
+		if (page !== 0) {
+			let page2 = page * 10;
+			sql += ' OFFSET '+page2;
+		}
+
+		let data = await query(sql, exec);
+		return data.map(e=> new WikiTemp(e));
+	}
+
+	static async saveTemplate(wikiId, name, args, method, content) {
+		let currentTemp = await query('SELECT * FROM `wikiTemplates` WHERE `wikiId` = ? AND `name` = ?', [wikiId, name]),
+		ID = currentTemp[0] ? currentTemp[0].ID : false,
+		sql = 'UPDATE `wikiTemplates` SET `args` = ?, `method` = ?, `content` = ? WHERE `wikiId` = ? AND `name` = ?',
+		exec = [args, method, content, wikiId, name];
+		if (!ID)
+			sql = 'INSERT INTO `wikiTemplates` (`args`, `method`, `content`, `wikiId`, `name`) VALUES (?,?,?,?,?)';
+		await query(sql, exec);
+
+		let data = await query('SELECT * FROM `wikiTemplates` WHERE `wikiId` = ? AND `name` = ?', [wikiId, name]);
+		return new WikiTemd(data);
+	}
+
+	static async deleteTemplate(wikiId, template) {
+		let data = await query('DELETE FROM `wikiTemplates` WHERE `wikiId` = ? AND name = ?', [wikiId, template])
+		return data;
+	}
+
+	renderTemplate() {
+		console.log(this);
+		return [
+			JSON.parse(this.args),
+			this.content,//.replace(/\n/g, "\n"),
+			this.method
+		];
 	}
 }
 
@@ -463,7 +555,6 @@ export class Vacans {
 	}
 
 	static async addVac(data) {
-		console.log(data);
 		const vac = await query('INSERT INTO `vacans` (`title`, `text`, `short`, `tags`, `mask`, `checked`, `hasLgbt`, `date`, `gdpsId`) VALUES (?,?,?,?,?,?,?,?,?)', data);
 		return vac.insertId;
 	}

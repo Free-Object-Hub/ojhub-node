@@ -4,7 +4,7 @@ export async function devices(server, url) {
 	server.route({
 		method: ['GET'],
 		url: url,
-		preHandler: [Auth.requireDevice],
+		preHandler: [Auth.requireDeviceNoVerify],
 		handler: async (request, reply) => {
 			const user = request.user;
 
@@ -21,7 +21,7 @@ export async function removeDevice(server, url) {
 	server.route({
 		method: ['GET'],
 		url: url,
-		preHandler: [Auth.requireDevice],
+		preHandler: [Auth.requireDeviceNoVerify],
 		handler: async (request, reply) => {
 			const user = request.user;
 			const uId = user.userId || user.ID;

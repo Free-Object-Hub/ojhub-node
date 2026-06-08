@@ -121,6 +121,13 @@ export class News {
 		return newsDone;
 	}
 
+	static async fetchById(ID) {
+		let sql = 'SELECT * FROM news WHERE ID = ?',
+			exec = [ID];
+		let news = await query(sql, exec);
+		return news.map(el => new News(el));
+	}
+
 	static async fetchNews(gdpsId, page = 0) {
 		let sql = 'SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.channel as gChannel '+
 			'FROM news n LEFT JOIN users u ON n.userId = u.userId LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
@@ -155,6 +162,14 @@ export class News {
 			[userId, ID, date, title, text, checked, hasFile]
 		)
 		return news.insertId;
+	}
+
+	static async NEWSedit(ID, text, title, gdpsId) {
+		const news = await query(
+			'UPDATE `news` SET `text` = ?, `title` = ? WHERE `ID` = ? AND gdpsId = ?',
+			[text, title, ID, gdpsId]
+		)
+		return news.affectedRows;
 	}
 
 	static async deleteNews(ID) {

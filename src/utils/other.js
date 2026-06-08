@@ -23,7 +23,7 @@ export function validateEmail(email) {
 }
 export async function TGwebhookLog(msg) {
 	const message = `${msg}\n\n${HELPER_VER}`;
-	const resp1 = false;
+	let resp1 = false;
 	
 	const postData = new URLSearchParams({
 		chat_id: process.env.TG_NEWS_RESENDER,
@@ -42,39 +42,32 @@ export async function TGwebhookLog(msg) {
 		// Таймаут для предотвращения зависаний
 		timeout: 5000
 	};
-	
-	const req = https.request(options, (res) => {
-		// Читаем ответ, но не ждем его
-		let data = '';
-		res.on('data', (chunk) => {
-			data += chunk;
+
+	return new Promise(resolve=>{
+		const req = https.request(options, (res) => {
+			let data = '';
+			res.on('data', (chunk) => {
+				data += chunk;
+			});
+			res.on('end', () => {
+				if (res.statusCode === 200) {
+					console.log('TG log sent OK');
+				} else {
+					console.log('TG log status:', res.statusCode, data);
+				}
+				resp1 = res.statusCode;
+			});
 		});
-		res.on('end', () => {
-			// Опционально: можно залогировать успешную отправку
-			if (res.statusCode === 200) {
-				console.log('TG log sent OK');
-			} else {
-				console.log('TG log status:', res.statusCode, data);
-			}
+		
+		req.on('error', (e) => {});
+		
+		req.on('timeout', () => {
+			req.destroy();
 		});
-	});
-	
-	req.on('error', (e) => {
-		// Тихий фейл - не логируем, если не нужно
-		// console.error('TG log error:', e.message);
-	});
-	
-	req.on('timeout', () => {
-		req.destroy();
-		// console.error('TG log timeout');
-	});
-	
-	// Пишем данные и завершаем запрос
-	req.write(postData);
-	req.end();
-	
-	// Возвращаем сразу, не дожидаясь ответа
-	return [resp1, null];
+		
+		req.write(postData);
+		req.end();
+		});
 };
 
 export async function parseFormData(parts) {

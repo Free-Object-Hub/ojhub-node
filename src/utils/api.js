@@ -9,7 +9,7 @@ import { GDPSswitchChannel } from './other.js';
 export { pool, query, queryOne, ramDB, getCity } from './db.js';
 export { User, Users, Device } from './users.js';
 export { Auth } from './auth.js';
-export { Gdps, Owners, Content, Guides, Wikis, Vacans, Applies } from './gdpses.js';
+export { Gdps, Owners, Content, Guides, Wikis, Vacans, Applies, WikiTemp } from './gdpses.js';
 export { Comments, News } from './comments.js';
 export { NewGdpsFinder, createBitmask, vacansAppliesReader, liketype, channelsCommsToLikes, checkLike, likeSet, removeLike } from './search.js';
 export { Alarms } from './alarms.js';
