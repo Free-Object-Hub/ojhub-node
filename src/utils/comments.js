@@ -93,6 +93,7 @@ export class News {
 			username: this.uNickname || this.uUsername || '???',
 			gdpsId: gdpsId || 0,
 			gdpsTitle: this.gTitle || '???',
+			gdpsImg: this.gImg || '',
 			date: this.date,
 			likes: [
 				this.likes,
@@ -105,7 +106,7 @@ export class News {
 	}
 
 	static async fetchAllNews(page = 0) {
-		let sql = 'SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.channel as gChannel '+
+		let sql = 'SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.img as gImg, g.channel as gChannel '+
 			'FROM news n LEFT JOIN users u ON n.userId = u.userId '+
 			'LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
 			'ORDER BY n.ID DESC LIMIT 11',
@@ -129,7 +130,7 @@ export class News {
 	}
 
 	static async fetchNews(gdpsId, page = 0) {
-		let sql = 'SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.channel as gChannel '+
+		let sql = 'SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.img as gImg, g.channel as gChannel '+
 			'FROM news n LEFT JOIN users u ON n.userId = u.userId LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
 			'WHERE n.gdpsId = ? ORDER BY n.ID DESC LIMIT 11',
 			exec = [gdpsId];
@@ -147,7 +148,7 @@ export class News {
 		if (gCache)
 			return new News(gCache);
 
-		const news = await query('SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.channel as gChannel '+
+		const news = await query('SELECT n.*, u.username as uUsername, u.nickname as uNickname, g.title as gTitle, g.img as gImg, g.channel as gChannel '+
 			'FROM news n LEFT JOIN users u ON n.userId = u.userId LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
 			'WHERE n.ID = ?', [ID])
 
