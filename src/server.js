@@ -105,12 +105,14 @@ fastify.route({
                     <link rel=icon>
                     <link href="./static/main.css?ver=20" rel=stylesheet>
                     <link href="./static/window.css?ver=20" rel=stylesheet>
+					${/*
                     <link rel="preconnect" href="https://fonts.googleapis.com">
                     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
                     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
                     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Huninn&family=Manrope:wght@200..800&family=News+Cycle:wght@400;700&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
+					*/''}
                     <script src="./static/newHelper.js?ver=21"></script>
-                    <script src="./static/nhConfig.js?ver=21"></script>
+                    <script defer src="./static/nhConfig.js?ver=21"></script>
                     <script defer src="./static/ojhub.js?ver=21"></script>
                     <style id=wikiStyle></style>
                 </head>
