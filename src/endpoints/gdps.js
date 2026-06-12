@@ -20,7 +20,7 @@ export async function gdps(server, url) {
 			]);
 
 			const json = {
-				gdps: gdps.GDPSrender(),
+				gdps: gdps.GDPSrender(true),
 				comments: {},
 				news: {}
 			};
