@@ -86,13 +86,17 @@ export async function loginToken(ip = '', token = '', device = '', showToken = f
 
 	if (!cacheSearch) {
 		let gdpses = {};
-		for (const el of gdpsesPre)
+		for (let i = 0; i < gdpsesPre.length && i < 3; i++) {
+			let el = gdpsesPre[i];
 			gdpses[GDPSswitchChannel(el.channel)+el.ID] = el.GDPSrenderLT()
+		}
 		Json[2] = gdpses;
 
 		let news = {};
-		for (const el of newsPre)
+		for (let i = 0; i < newsPre.length && i < 3; i++) {
+			let el = newsPre[i];
 			news['n'+el.ID] = el.NEWSrender();
+		}
 		Json[3] = news;
 		await ramDB.s('loginTcache', [Json[2],Json[3]], 300);
 	}
