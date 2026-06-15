@@ -113,7 +113,7 @@ fastify.route({
 					*/''}
                     <script src="./static/newHelper.js?ver=21"></script>
                     <script defer src="./static/nhConfig.js?ver=21"></script>
-                    <script defer src="./static/ojhub.js?ver=21"></script>
+                    <script defer src="./static/ojhub.js?ver=22"></script>
                     <style id=wikiStyle></style>
                 </head>
                 <body style="background-color:var(--color-bg)">
@@ -123,6 +123,36 @@ fastify.route({
                     </div>
                 </body>
             </html>`;
+        return reply.type('text/html').send(html);
+	}
+});
+
+fastify.route({
+	method: ['GET'],
+	url: '/loader',
+	handler: async (request, reply) => {
+		let ver = (v, date='', desc='')=>`<tr>
+			<td><button onclick=(document.cookie='cli_ver=${v};path=/;max-age=${60*60*24*365}');location.pathname=''>${v}</button></td>
+			<td>${date}</td>
+			<td>${desc}</td>
+		</tr>`;
+		let html =  `<div style=display:flex;justify-content:center;align-items:center;min-height:100vh;flex-direction:column>
+			<h1>OJHUB LOADER v1.00</h1>`+
+			`<table border=1>
+				<tr>
+					<th>ver</th>
+					<th>date</th>
+					<th>desc</th>
+				</tr>
+				<tr>
+					<td><button onclick=(document.cookie='cli_ver=;path=/;max-age=0');location.pathname=''>latest</button></td>
+					<td></td>
+					<td></td>
+				</tr>${
+				ver('0.97.6', '15 Jun 2026', 'current latest')+
+				ver('0.97.5', '10 Jun 2026')
+			}</table>`+
+		`</div>`;
         return reply.type('text/html').send(html);
 	}
 });
