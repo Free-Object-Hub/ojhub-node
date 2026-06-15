@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 //import { startRepl } from './repl.js';
 
 import cors from '@fastify/cors';
+import cookie from '@fastify/cooki@fastify/cookiee';
 import formbody from '@fastify/formbody';
 import multipart from '@fastify/multipart';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -51,49 +52,51 @@ fastify.route({
         let meta = `<meta property="og:title" content="Object hub">
                     <meta property="og:description" content="Удобный сервис для поиска и размещения своих обджект шоу и кемпов!">
                     <meta property="og:image" content="https://objecthub.xyz/imgs/hubbig.png">`;
-		const defResp = 'metatag';
-		const b = request.query;
-		if (b['Wikis'])
-            meta = `<meta property="og:title" content="Object Hub Wiki">
-                    <meta property="og:description" content="Добро пожаловать на наш редактор пользовательских вики!">
-                    <meta property="og:image" content="https://objecthub.xyz/imgs/hubbig.png">`
-		if (b['camp'] || b['show'] || b['pere']) {
-			let gIdPre = b['camp'] || b['show'] || b['pere'];
-			let gId = parseInt(gIdPre);
-			if (Number.isNaN(gId))
-				return defResp;
-			let gdps = await Gdps.fetchById(parseInt(gId));
-            meta = `<meta property="og:title" content="${gdps.title}">
+			const defResp = 'metatag';
+			const b = request.query;
+			if (b['Wikis'])
+	            meta = `<meta property="og:title" content="Object Hub Wiki">
+	                <meta property="og:description" content="Добро пожаловать на наш редактор пользовательских вики!">
+		            <meta property="og:image" content="https://objecthub.xyz/imgs/hubbig.png">`
+			if (b['camp'] || b['show'] || b['pere']) {
+				let gIdPre = b['camp'] || b['show'] || b['pere'];
+				let gId = parseInt(gIdPre);
+				if (Number.isNaN(gId))
+					return defResp;
+				let gdps = await Gdps.fetchById(parseInt(gId));
+				meta = `<meta property="og:title" content="${gdps.title}">
                     <meta property="og:description" content="${gdps.short}">
                     <meta property="og:image" content="${gdps.img}">`;
-		}
-		if (b['wiki']) {
-			let gIdPre = b['wiki'];
-			let gId = parseInt(gIdPre);
-			if (Number.isNaN(gId))
-				return defResp;
-			let gdps = await Wikis.fetchById(parseInt(gId));
-            meta = `<meta property="og:title" content="${gdps.title}">
+			}
+			if (b['wiki']) {
+				let gIdPre = b['wiki'];
+				let gId = parseInt(gIdPre);
+				if (Number.isNaN(gId))
+					return defResp;
+				let gdps = await Wikis.fetchById(parseInt(gId));
+				meta = `<meta property="og:title" content="${gdps.title}">
                     <meta property="og:description" content="${gdps.text}">
                     <meta property="og:image" content="https://objecthub.xyz/imgs/hubbig.png">`;
-		}
-        if (b['VacsC']) {
-            let nId = b['VacsC'];
-            let news = await Vacans.fetchById(nId);
-            let gdps = await Gdps.fetchById(news.gdpsId);
-            meta = `<meta property="og:title" content="${news.title}">
+			}
+		    if (b['VacsC']) {
+			    let nId = b['VacsC'];
+				let news = await Vacans.fetchById(nId);
+	            let gdps = await Gdps.fetchById(news.gdpsId);
+		        meta = `<meta property="og:title" content="${news.title}">
                     <meta property="og:description" content="${news.text}">
                     <meta property="og:image" content="${gdps.img}">`;
-        }
-        if (b['news/comms']) {
-            let nId = b['news/comms'].split('|')[0];
-            let news = await News.fetchById(nId);
-            let gdps = await Gdps.fetchById(news.gdpsId);
-            let decodedText = Buffer.from(news.text, 'base64').toString('utf-8');
-            meta = `<meta property="og:title" content="${news.title}">
+			}
+	        if (b['news/comms']) {
+		        let nId = b['news/comms'].split('|')[0];
+			    let news = await News.fetchById(nId);
+				let gdps = await Gdps.fetchById(news.gdpsId);
+	            let decodedText = Buffer.from(news.text, 'base64').toString('utf-8');
+		        meta = `<meta property="og:title" content="${news.title}">
                     <meta property="og:description" content="${decodedText}">
                     <meta property="og:image" content="${gdps.img}">`;
         }
+		let ver = request.cookies.cli_ver || '0.97.6'; // надеюсь работает я не ебу
+		console.log(ver);
 
         let html = `<!DOCTYPE html>
             <html>
@@ -103,17 +106,17 @@ fastify.route({
                     ${meta}
                     <title>Object Hub</title>
                     <link rel=icon>
-                    <link href="./static/main.css?ver=20" rel=stylesheet>
-                    <link href="./static/window.css?ver=20" rel=stylesheet>
+                    <link href="./cli/${ver}/main.css?ver=20" rel=stylesheet>
+                    <link href="./cli/${ver}/window.css?ver=20" rel=stylesheet>
 					${/*
                     <link rel="preconnect" href="https://fonts.googleapis.com">
                     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
                     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
                     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Huninn&family=Manrope:wght@200..800&family=News+Cycle:wght@400;700&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
 					*/''}
-                    <script src="./static/newHelper.js?ver=21"></script>
-                    <script defer src="./static/nhConfig.js?ver=21"></script>
-                    <script defer src="./static/ojhub.js?ver=22"></script>
+                    <script defer src="./cli/${ver}/newHelper.js?ver=21"></script>
+                    <script defer src="./cli/${ver}/nhConfig.js?ver=21"></script>
+                    <script defer src="./cli/${ver}/ojhub.js?ver=22"></script>
                     <style id=wikiStyle></style>
                 </head>
                 <body style="background-color:var(--color-bg)">
@@ -191,6 +194,7 @@ await fastify.register(cors, {
     maxAge: 86400,
     credentials: true
 });
+fastify.register(cookie);
 console.log('=> Fastify done');
 
 fastify.listen({ port: 3000 }, (err, address) => {
