@@ -108,5 +108,9 @@ export const CH = {
 		CAMP: 0,
 		SHOW: 1,
 		PERE: 2,
-	}
+	},
+	WIKI: -1,
+	GUIDE: -2,
+	FORUM: -3,
+	VACAN: -5,
 };
