@@ -145,7 +145,7 @@ fastify.route({
 					<th>desc</th>
 				</tr>
 				<tr>
-					<td><button onclick=(document.cookie='cli_ver=;path=/;max-age=0');location.pathname=''>latest</button></td>
+					<td><button onclick=(document.cookie='cli_ver=\`\`;path=/;max-age=0');location.pathname=''>latest</button></td>
 					<td></td>
 					<td></td>
 				</tr>${
