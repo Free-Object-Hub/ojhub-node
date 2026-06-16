@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 //import { startRepl } from './repl.js';
 
 import cors from '@fastify/cors';
-import cookie from '@fastify/cooki@fastify/cookiee';
+import cookie from '@fastify/cookie';
 import formbody from '@fastify/formbody';
 import multipart from '@fastify/multipart';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -95,8 +95,8 @@ fastify.route({
                     <meta property="og:description" content="${decodedText}">
                     <meta property="og:image" content="${gdps.img}">`;
         }
-		let ver = request.cookies.cli_ver || '0.97.6'; // надеюсь работает я не ебу
-		console.log(ver);
+		let cVer = request.cookies.cli_ver;
+		let ver = cVer || '0.97.6';
 
         let html = `<!DOCTYPE html>
             <html>
@@ -152,8 +152,9 @@ fastify.route({
 					<td></td>
 					<td></td>
 				</tr>${
-				ver('0.97.6', '15 Jun 2026', 'current latest')+
-				ver('0.97.5', '10 Jun 2026')
+				ver('0.97.6', '16 Jun 2026', 'current latest')+
+				ver('0.97.5', '10 Jun 2026', 'rev. 1')+
+				ver('0.97.33', '31 Jan 2026', 'rev. 1')
 			}</table>`+
 		`</div>`;
         return reply.type('text/html').send(html);
