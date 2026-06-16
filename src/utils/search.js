@@ -1,4 +1,4 @@
-import { query, Gdps, Wikis, Vacans, Users, Auth } from './api.js';
+import { query, Gdps, Wikis, Vacans, Users, Auth, CH } from './api.js';
 
 export function createBitmask(tagIds) {
 	let mask = 0n;
@@ -47,12 +47,12 @@ export async function NewGdpsFinder(method, channel, page, tags = [], oss = [], 
 	page = parseInt(page);
 
 	const parseClasses = {
-		'-5':	(g)=>g.map(el => new Vacans(el)),
+		[CH.VACAN]:	(g)=>g.map(el => new Vacans(el)),
 		'-2':	(g)=>g.map(el => new Gdps(el)),
-		'-1':	(g)=>g.map(el => new Wikis(el)),
-		'0':	(g)=>g.map(el => new Gdps(el)),
-		'1':	(g)=>g.map(el => new Gdps(el)),
-		'2':	(g)=>g.map(el => new Gdps(el))
+		[CH.WIKI]:	(g)=>g.map(el => new Wikis(el)),
+		[CH.PROJECT.CAMP]:	(g)=>g.map(el => new Gdps(el)),
+		[CH.PROJECT.SHOW]:	(g)=>g.map(el => new Gdps(el)),
+		[CH.PROJECT.PERE]:	(g)=>g.map(el => new Gdps(el))
 	};
 
 	let prep = "",
@@ -60,18 +60,18 @@ export async function NewGdpsFinder(method, channel, page, tags = [], oss = [], 
 
 	const defGdpsData = 'ID,g.title,g.channel,g.description,g.short,g.tags,g.os,g.mask,g.likes,g.disls,g.commsCount,g.author,g.username,g.img,g.ban,g.connectedWiki';
 	switch (parseInt(channel)) {
-		case -5:
+		case CH.VACAN:
 			prep = "SELECT g.*, p.channel as gChannel, p.title as gTitle FROM vacans g LEFT JOIN gdpses p ON g.gdpsId = p.ID WHERE g.checked = 1";
 			break;
 		case -2:
 			prep = `SELECT g.${defGdpsData} FROM gdpses g WHERE g.checked = 1`;
 			break;
-		case -1:
+		case CH.WIKI:
 			prep = "SELECT g.* FROM wikis g WHERE g.checked = 1";
 			break;
-		case 0:
-		case 1:
-		case 2:
+		case CH.PROJECT.CAMP:
+		case CH.PROJECT.SHOW:
+		case CH.PROJECT.PERE:
 			prep = `SELECT g.${defGdpsData} FROM gdpses g WHERE g.checked = 1 AND g.channel = ?`;
 			exec.push(channel);
 			break;
