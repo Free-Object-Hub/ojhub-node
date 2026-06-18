@@ -52,7 +52,8 @@ export async function NewGdpsFinder(method, channel, page, tags = [], oss = [], 
 		[CH.WIKI]:	(g)=>g.map(el => new Wikis(el)),
 		[CH.PROJECT.CAMP]:	(g)=>g.map(el => new Gdps(el)),
 		[CH.PROJECT.SHOW]:	(g)=>g.map(el => new Gdps(el)),
-		[CH.PROJECT.PERE]:	(g)=>g.map(el => new Gdps(el))
+		[CH.PROJECT.PERE]:	(g)=>g.map(el => new Gdps(el)),
+		[CH.PROJECT.TELE]:	(g)=>g.map(el => new Gdps(el))
 	};
 
 	let prep = "",
@@ -72,6 +73,7 @@ export async function NewGdpsFinder(method, channel, page, tags = [], oss = [], 
 		case CH.PROJECT.CAMP:
 		case CH.PROJECT.SHOW:
 		case CH.PROJECT.PERE:
+		case CH.PROJECT.TELE:
 			prep = `SELECT g.${defGdpsData} FROM gdpses g WHERE g.checked = 1 AND g.channel = ?`;
 			exec.push(channel);
 			break;
@@ -101,9 +103,10 @@ export async function NewGdpsFinder(method, channel, page, tags = [], oss = [], 
 		const offset = page * 8;
 		exec.push(offset);
 	}
-
+	console.log(prep, exec);
 	let gdpses = await query(prep, exec),
 	gdpsesDone = parseClasses[channel.toString()](gdpses);
+	console.log(gdpses, gdpsesDone);
 	return gdpsesDone;
 }
 

@@ -108,6 +108,7 @@ export const CH = {
 		CAMP: 0,
 		SHOW: 1,
 		PERE: 2,
+		TELE: 3,
 	},
 	WIKI: -1,
 	GUIDE: -2,
