@@ -113,6 +113,7 @@ fastify.route({
                     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
                     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
                     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Huninn&family=Manrope:wght@200..800&family=News+Cycle:wght@400;700&family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
+
 					*/''}
                     <script defer src="./cli/${ver}/newHelper.js?ver=21"></script>
                     <script defer src="./cli/${ver}/nhConfig.js?ver=21"></script>
@@ -129,7 +130,6 @@ fastify.route({
         return reply.type('text/html').send(html);
 	}
 });
-
 fastify.route({
 	method: ['GET'],
 	url: '/loader',
@@ -152,7 +152,9 @@ fastify.route({
 					<td></td>
 					<td></td>
 				</tr>${
-				ver('0.97.6', '16 Jun 2026', 'current latest')+
+
+				ver('0.97.7', '????', 'current latest')+
+				ver('0.97.6', '16 Jun 2026', 'stable')+
 				ver('0.97.5', '10 Jun 2026', 'rev. 1')+
 				ver('0.97.33', '31 Jan 2026', 'rev. 1')
 			}</table>`+
