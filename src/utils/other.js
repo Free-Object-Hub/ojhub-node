@@ -8,7 +8,8 @@ export function GDPSswitchChannel(channel) {
 	const switcher = {
 		[CH.PROJECT.CAMP]: 'c',
 		[CH.PROJECT.SHOW]: 's',
-		[CH.PROJECT.PERE]: 'p'
+		[CH.PROJECT.PERE]: 'p',
+		[CH.PROJECT.TELE]: 't'
 	};
 	return switcher[channel]
 };
