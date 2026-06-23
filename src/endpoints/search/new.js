@@ -63,6 +63,10 @@ export async function global(server, url) {
 					for (const el of gdpsesPre)
 						gdpses['p'+el.ID] = el.GDPSrenderLT();
 					break;
+				case 3:
+					for (const el of gdpsesPre)
+						gdpses['t'+el.ID] = el.GDPSrenderLT();
+					break;
 			}
 
 			if (!name)
