@@ -3,7 +3,6 @@ import { UAParser } from 'ua-parser-js';
 import crypto from 'crypto';
 
 async function verifyRecaptcha(recaptchaResponse, remoteIp) {
-	return Promise.resolve({success:true});
 	const url = 'https://www.google.com/recaptcha/api/siteverify';
 	
 	const params = new URLSearchParams({
@@ -41,7 +40,9 @@ export function login(server, url) {
 			if (!cap.success)
 				return '-3';
 			let username = exploitPatch(b.username);
-			const user = await Users.fetchByUsername(username);
+			let user = await Users.fetchByUsername(username);
+			if (!user)
+				user = await Users.fetchByEmail(username);
 			if (!user)
 				return '-2';
 			if (!user.verifyPassword(b.password))
