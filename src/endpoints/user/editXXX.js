@@ -32,8 +32,9 @@ export async function setResume(server, url) {
 		handler: async (request, reply) => {
 			const user = request.user;
 			const uId = user.userId || user.ID;
+			const b = new URLSearchParams(request.body)
 
-			const newResume = exploitPatch(request.body.name);
+			const newResume = exploitPatch(b.get('name'));
 			const result = await Promise.all([
 				Users.setResume(uId, newResume),
 				ramDB.r('user:'+uId),
@@ -56,8 +57,9 @@ export async function setSocials(server, url) {
 		handler: async (request, reply) => {
 			const user = request.user;
 			const uId = user.userId || user.ID;
+			const b = new URLSearchParams(request.body)
 
-			const newSocials = exploitPatch(request.body.name);
+			const newSocials = exploitPatch(b.get('name'));
 			const result = await Promise.all([
 				Users.setSocials(uId, newSocials),
 				ramDB.r('user:'+uId),
