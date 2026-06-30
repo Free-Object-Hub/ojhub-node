@@ -152,7 +152,7 @@ export class News {
 			'FROM news n LEFT JOIN users u ON n.userId = u.userId LEFT JOIN gdpses g ON n.gdpsId = g.ID '+
 			'WHERE n.ID = ?', [ID])
 
-		if (!gCache) await ramDB.s('newsIdCache:'+ID, news[0]);
+		if (!gCache) await ramDB.s('newsIdCache:'+ID, news[0], 300);
 
 		return new News(news[0]);
 	}

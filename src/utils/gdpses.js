@@ -75,7 +75,7 @@ export class Gdps {
 
 		const gdps = await query('SELECT * FROM `gdpses` WHERE `ID` = ?', [ID]);
 
-		if (!gCache) await ramDB.s('gdpsIdCache:'+ID, gdps[0]);
+		if (!gCache) await ramDB.s('gdpsIdCache:'+ID, gdps[0], 300);
 
 		return new Gdps(gdps[0]);
 	}
@@ -351,7 +351,7 @@ export class Wikis {
 
 		const wiki = await query('SELECT * FROM `wikis` WHERE `ID` = ?', [ID]);
 
-		if (!gCache) await ramDB.s('wikiIdCache:'+ID, wiki[0]);
+		if (!gCache) await ramDB.s('wikiIdCache:'+ID, wiki[0], 300);
 
 		return new Wikis(wiki[0]);
 	}
@@ -516,7 +516,7 @@ export class Vacans {
 
 		const gdps = await query('SELECT * FROM `vacans` WHERE `ID` = ?', [ID]);
 
-		if (!gCache) await ramDB.s('vacsIdCache:'+ID, gdps[0]);
+		if (!gCache) await ramDB.s('vacsIdCache:'+ID, gdps[0], 300);
 
 		return new Vacans(gdps[0]);
 	}
