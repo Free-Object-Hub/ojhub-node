@@ -7,13 +7,14 @@ export async function profile(server, url) {
 		handler: async (request, reply) => {
 			const uId = parseInt(request.query.id);
 			const cache = await ramDB.g('userP:'+uId);
+			console.log(uId, cache)
 			if (cache)
 				return cache;
 
 			const user = await Users.fetchById(uId);
 			const json = user.renderPublic();
 
-			await ramDB.s('userP:'+uId, user, 300);
+			await ramDB.s('userP:'+uId, json, 300);
 
 			return json;
 		}
