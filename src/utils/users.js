@@ -96,6 +96,7 @@ export class Users {
 
 	static async fetchByEmail(email) {
 		let user = await query('SELECT * FROM users WHERE mail = ?', [email]);
+		console.log(email, user && user.userId)
 		if (!user || user.length === 0)
 			return null;
 		return new User(user[0]);
@@ -138,6 +139,7 @@ export class Users {
 	}
 
 	static async setResume(userId, resume) {
+		console.log(userId, resume)
 		const resume2 = await query('UPDATE users SET resume = ? WHERE userId = ?', [resume, userId]);
 		return resume2.affectedRows;
 	}

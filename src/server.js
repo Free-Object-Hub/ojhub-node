@@ -9,7 +9,6 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 import { Gdps, Wikis, News, Vacans } from './utils/api.js'; 
 
-
 import fs from 'fs';
 import path from 'path';
 
@@ -58,8 +57,8 @@ fastify.route({
 	            meta = `<meta property="og:title" content="Object Hub Wiki">
 	                <meta property="og:description" content="Добро пожаловать на наш редактор пользовательских вики!">
 		            <meta property="og:image" content="https://objecthub.xyz/imgs/hubbig.png">`
-			if (b['camp'] || b['show'] || b['pere']) {
-				let gIdPre = b['camp'] || b['show'] || b['pere'];
+			if (             b['camp'] || b['show'] || b['pere'] || b['tele']) {
+				let gIdPre = b['camp'] || b['show'] || b['pere'] || b['tele'];
 				let gId = parseInt(gIdPre);
 				if (Number.isNaN(gId))
 					return defResp;
@@ -125,6 +124,7 @@ fastify.route({
                     <div id=windowsXP>
                         <div id=Professional class=hider></div>
                     </div>
+                    <div id=alerts class=alerts></div>
                 </body>
             </html>`;
         return reply.type('text/html').send(html);
@@ -153,10 +153,10 @@ fastify.route({
 					<td></td>
 				</tr>${
 
-				ver('0.97.7', '????', 'current latest')+
-				ver('0.97.6', '16 Jun 2026', 'stable')+
-				ver('0.97.5', '10 Jun 2026', 'rev. 1')+
-				ver('0.97.33', '31 Jan 2026', 'rev. 1')
+				ver('0.97.7',	'?? ??? 2026',	'latest')+
+				ver('0.97.6',	'16 Jun 2026',	'stable')+
+				ver('0.97.5',	'10 Jun 2026',	'rev. 1')+
+				ver('0.97.33',	'31 Jan 2026',	'rev. 1')
 			}</table>`+
 		`</div>`;
         return reply.type('text/html').send(html);
