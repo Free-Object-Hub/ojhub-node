@@ -9,9 +9,10 @@ export async function get(server, url) {
 			const user = request.user;
 			let alarm = await Alarms.getFullAlarm(request.query.id);
 
-			if (alarm.userId == user.userId || user.priority > 0)
+			if (alarm.userId == user.userId || user.priority > 0) {
+				Alarms.updateAlarm(request.query.id);
 				return alarm.render();
-			else 
+			} else 
 				return '{}';
 		}
 	});

@@ -25,6 +25,13 @@ export async function removeSubscription(endpoint) {
 	await query('DELETE FROM pushs WHERE endpoint = ?', [endpoint]);
 }
 
+export async function getSubsByUsers(userIds) {
+	if (!userIds || userIds.length === 0) return [];
+
+	const placeholders = userIds.map(() => '?').join(',');
+	return query(`SELECT * FROM pushs WHERE userId IN (${placeholders})`, userIds);
+}
+
 export async function getSubscriptionsByUser(userId) {
 	return query('SELECT * FROM pushs WHERE userId = ?', [userId]);
 }
@@ -53,5 +60,4 @@ async function sendToSubscription(sub, payload) {
 		}
 	}
 }
-
 export default webpush;

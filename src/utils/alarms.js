@@ -1,4 +1,4 @@
-import { query, queryOne } from './api.js';
+import { query, queryOne, Users, sendToUser } from './api.js';
 
 export class Alarms {
 	constructor(data = {}) {
@@ -29,12 +29,17 @@ export class Alarms {
 		if (id.length) return 1;
 		else return 0;
 	}
-	
+
+	static async updateAlarm(ID) {
+		const alarm = await query('UPDATE alarms SET public = 2 WHERE ID = ?', [ID]);
+		return alarm.affectedRows;
+	}
+
 	static async getFullAlarm(ID) {
 		const alarm = await query('SELECT * FROM alarms WHERE ID = ?', [ID]);
 		return new Alarms(alarm[0]);
 	}
-	
+
 	static async getAlarmsList(userId, isAdmin, page) {
 		const offset = page * 10;
 		let admText = ' OR `userId` = 0';
@@ -42,7 +47,6 @@ export class Alarms {
 			admText = '';
 		const quer = 'SELECT * FROM alarms WHERE public != 0 AND (userId = ?'+admText+') ORDER BY date DESC LIMIT 11 OFFSET ?';
 		const exec = [userId, offset];
-		console.log(quer, exec);
 		let alarms = await query(quer, exec);
 		return alarms.map(el => new Alarms(el));
 	}
@@ -52,10 +56,25 @@ export class Alarms {
 		return result.affectedRows;
 	}
 
+	static async fullWrite(title, text, userId, date, adminId) {
+		let uName = 'Object Hub'
+		if (adminId !== 0) {
+			let a = await Users.fetchById(adminId);
+			uName = a.nickname || a.username;
+		}
+		const alarmId = await Alarms.writeAlarm(title, text, userId, date, uName, adminId);
+	
+		sendToUser(userId, { title, body: text.slice(0, 100), url: '/?alarms' })
+			.catch(err => console.error('alarm push failed', err));
+	
+		return alarmId;
+	}
+
 	static async writeAlarm(title, text, userId, date, adminName, adminId) {
-		return await query(
+		let data = await query(
 			'INSERT INTO `alarms` (`title`, `text`, `userId`, `date`, `adminName`, `adminId`) VALUES (?, ?, ?, ?, ?, ?)',
 			[title, text, userId, date, adminName, adminId]
-		).insertId;
+		);
+		return data.insertId;
 	}
 }

@@ -29,6 +29,7 @@ export async function add(server, url) {
 				let filename = `${process.env.IMGS}customnews/${news}.${ext}`;
 				await fs.writeFile(filename, files.files.buffer);
 			}
+			let SubList = await Gdps.getSubs(gId);
 			TGwebhookLog(`NEW NEWS ${news} with name ${title}:\n${text}`);
 			await ramDB.r('gdpsF:'+gId);
 

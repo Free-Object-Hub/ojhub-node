@@ -137,6 +137,34 @@ export class Gdps {
 	static async refreshAvatar(gdpsId, img, ban) {
 		return await query('UPDATE `gdpses` SET `img` = ?, `ban` = ? WHERE `gdpses`.`ID` = ?', [img, ban, gdpsId]);
 	}
+
+	static async sub(userId, gdpsId) {
+		await query(
+			`INSERT INTO gdpsSubs (userId, gdpsId, date) VALUES (?, ?, ?)
+			ON DUPLICATE KEY UPDATE date = date`,
+			[userId, gdpsId, time()]
+		);
+	}
+
+	static async unsub(userId, gdpsId) {
+		await query('DELETE FROM gdpsSubs WHERE userId = ? AND gdpsId = ?', [userId, gdpsId]);
+	}
+
+	static async isSub(userId, gdpsId) {
+		const rows = await query('SELECT ID FROM gdpsSubs WHERE userId = ? AND gdpsId = ?', [userId, gdpsId]);
+		return rows.length > 0;
+	}
+
+	static async getSubs(gdpsId) {
+		return query('SELECT userId FROM gdpsSubs WHERE gdpsId = ?', [gdpsId]);
+	}
+
+	static async getSubsByUsers(userIds) {
+		if (!userIds || userIds.length === 0) return [];
+
+		const placeholders = userIds.map(() => '?').join(',');
+		return query(`SELECT * FROM gdpsSubs WHERE userId IN (${placeholders})`, userIds);
+	}
 }
 
 export class Owners {
