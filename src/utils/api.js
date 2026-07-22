@@ -122,5 +122,7 @@ export async function loginToken(ip = '', token = '', device = '', showToken = f
 		])
 	}
 
+	console.log(Json[0]);
+
 	return Json;
 };

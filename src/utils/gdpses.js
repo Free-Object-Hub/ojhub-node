@@ -472,7 +472,6 @@ export class WikiTemp {
 	}
 
 	renderTemplate() {
-		console.log(this);
 		return [
 			JSON.parse(this.args),
 			this.content,//.replace(/\n/g, "\n"),
@@ -655,6 +654,54 @@ export class Applies {
 
 	static async removeAplsByUser(userId, aplId) {
 		const data = await query('DELETE FROM `vacsApplies` WHERE `userId` = ? AND ID = ?', [userId, aplId]);
+		return data.affectedRows;
+	}
+}
+
+export class GdpsSubs {
+	constructor(data = {}) {
+		Object.assign(this, data);
+	}
+
+	renderApply() {
+		let apl = {
+			ID: this.ID,
+			vacId: this.vacId,
+			userId: this.userId,
+			username: this.uNickname || this.uUsername || '???',
+			resume: this.uResume || '',
+			date: this.date,
+			status: this.status,
+		};
+		return apl;
+	}
+
+	static async fetchGdpsSubs(gdpsId) {
+		let quer = `SELECT * FROM gdpsSubs WHERE gdpsId = ? LIMIT 11`,
+			exec = [gdpsId];
+		const apls = await query(quer, exec);
+		return apls.map(a=>new GdpsSubs(a));
+	}
+
+	static async fetchUserSubs(userId, page = 0) {
+		let quer = `SELECT * FROM gdpsSubs WHERE userId = ? LIMIT 11`,
+			exec = [userId];
+		if (page !== 0) {
+			let offset = page * 10;
+			quer += ' OFFSET ?';
+			exec.push(offset);
+		}
+		const apls = await query(quer, exec);
+		return apls.map(a=>new GdpsSubs(a));
+	}
+
+	static async applySub(data) {
+		const data2 = await query('INSERT INTO `gdpsSubs` (`gdpsId`, `userId`, `date`) VALUES (?,?,?)', data);
+		return data2.insertId;
+	}
+
+	static async removeSub(userId, gdpsId) {
+		const data = await query('DELETE FROM `gdpsSubs` WHERE `userId` = ? AND `gdpsId` = ?', [userId, gdpsId]);
 		return data.affectedRows;
 	}
 }

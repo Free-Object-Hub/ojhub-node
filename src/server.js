@@ -156,7 +156,7 @@ fastify.route({
 				ver('0.97.7',	'?? ??? 2026',	'latest')+
 				ver('0.97.6',	'16 Jun 2026',	'stable')+
 				ver('0.97.5',	'10 Jun 2026',	'rev. 1')+
-				ver('0.97.33',	'31 Jan 2026',	'rev. 1')
+				ver('0.97.33',	'31 Jan 2026',	'legacy-php')
 			}</table>`+
 		`</div>`;
         return reply.type('text/html').send(html);

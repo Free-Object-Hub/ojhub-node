@@ -7,8 +7,10 @@ export function loginT(server, url) {
 		handler: async (request, reply) => {
 			let token = request.headers['user-token'] || request.headers['User-Token'];
 			let device = request.headers['device-static'] || request.headers['Device-Static'];
+			console.log(token, device)
+			console.log(token && device)
 			if (token && device)
-				return await loginToken(request.ip, token, device);
+				return await loginToken(request.ip, token, device, true);
 			else
 				return await loginToken(request.ip);
 		}

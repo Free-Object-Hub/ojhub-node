@@ -106,7 +106,6 @@ export async function NewGdpsFinder(method, channel, page, tags = [], oss = [], 
 	console.log(prep, exec);
 	let gdpses = await query(prep, exec),
 	gdpsesDone = parseClasses[channel.toString()](gdpses);
-	console.log(gdpses, gdpsesDone);
 	return gdpsesDone;
 }
 
