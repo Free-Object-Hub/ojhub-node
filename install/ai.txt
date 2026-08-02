@@ -1,0 +1,416 @@
+./git_clone.sh
+
+===== ./git_clone.sh =====
+#!/bin/sh
+
+# и накоенц то!
+# Раз репозитории object hub выложены в public domain,
+# их наконец можно создать нормально
+
+mkdir -p "$PROJECT_ROOT"
+
+CLIENT="https://github.com/MIOBOMB/ojhub-cli.git"
+OPENGO="https://github.com/MIOBOMB/ojhub-openGo.git"
+
+if ! git clone "$CLIENT" "$CLIENT_ROOT"; then
+    echo "[ERROR] Failed to clone Object Hub client"
+    exit 1
+fi
+
+if ! git clone "$OPENGO" "$SERVER_ROOT"; then
+    echo "[ERROR] Failed to clone Object Hub server"
+    exit 1
+fi
+
+./packages.sh
+
+===== ./packages.sh =====
+#!/bin/sh
+
+pkg_update
+echo "Installing packages..."
+pkg_install $PACKAGE_NGINX $PACKAGE_REDIS $PACKAGE_MARIADB $PACKAGE_GO $PACKAGE_GIT >> "$LOG_FILE" 2>&1
+echo "OK"
+./nginx_cfg.sh
+
+===== ./nginx_cfg.sh =====
+#!/bin/sh
+
+echo "Configuring nginx..."
+
+# директория, куда кладём конфиг Object Hub
+mkdir -p "$NGINX_CONF_DIR/conf.d"
+
+# генерация конфига из шаблона
+sed -e "s|{{DOMAIN_NAME}}|$DOMAIN_NAME|g" -e "s|{{SERVER_ROOT}}|$SERVER_ROOT|g" -e "s|{{CLIENT_ROOT}}|$CLIENT_ROOT|g" ojhub-nginx.conf > "$NGINX_CONF_DIR/conf.d/ojhub.conf"
+
+if ! grep -qF "conf.d/*.conf" "$NGINX_CONF"; then
+
+	echo "Adding nginx include..."
+
+	cp "$NGINX_CONF" "$NGINX_CONF.bak"
+
+	awk '
+	{
+		print
+		if ($0 ~ /^[[:space:]]*http[[:space:]]*\{/)
+			print "\tinclude conf.d/*.conf;"
+	}
+	' "$NGINX_CONF" > "$NGINX_CONF.tmp"
+
+
+	if mv "$NGINX_CONF.tmp" "$NGINX_CONF"; then
+		echo "nginx include added"
+	else
+		echo "WARN: failed to modify nginx.conf"
+		echo "Please add manually: include conf.d/*.conf;"
+		rm -f "$NGINX_CONF.tmp"
+	fi
+
+fi
+
+nginx -t || {
+    echo "nginx configuration error"
+    exit 1
+}
+
+service_enable "$SERVICE_NGINX"
+service_start "$SERVICE_NGINX"
+
+echo "nginx configured"
+./prof/freebsd.sh
+
+===== ./prof/freebsd.sh =====
+#!/bin/sh
+
+# Object Hub installer
+# FreeBSD platform configuration
+# ==========================
+# Platform info
+# ==========================
+
+PLATFORM_NAME="freebsd"
+REQUIRES_ROOT="yes"
+SYSTEM_SERVICE="yes"
+
+# ==========================
+# Package manager
+# ==========================
+pkg_install() {
+    pkg install -y "$@"
+}
+pkg_update() {
+    pkg update
+}
+
+# ==========================
+# Services
+# ==========================
+service_enable() {
+    sysrc "${1}_enable=YES"
+}
+service_disable() {
+    sysrc "${1}_enable=NO"
+}
+service_start() {
+    service "$1" start
+}
+service_stop() {
+    service "$1" stop
+}
+service_restart() {
+    service "$1" restart
+}
+
+# ==========================
+# Packages
+# ==========================
+PACKAGE_NGINX="nginx"
+PACKAGE_REDIS="redis"
+PACKAGE_MARIADB="mariadb118-server"
+PACKAGE_GO="go126"
+PACKAGE_GIT="git"
+
+# ==========================
+# Service names
+# ==========================
+SERVICE_NGINX="nginx"
+SERVICE_REDIS="redis"
+SERVICE_MARIADB="mysql-server"
+
+# ==========================
+# Paths
+# ==========================
+
+PREFIX="/usr/local"
+	
+NGINX_CONF_DIR="/usr/local/etc/nginx"
+NGINX_CONF="/usr/local/etc/nginx/nginx.conf"
+	
+REDIS_CONF="/usr/local/etc/redis.conf"
+	
+PROJECT_ROOT="/usr/local/ojhub"
+SERVER_ROOT="openGo"
+CLIENT_ROOT="cli"
+
+# ==========================
+# Users
+# ==========================
+	
+WEB_USER="www"
+WEB_GROUP="www"
+
+# ==========================
+# Shell environment
+# ==========================
+export PLATFORM_NAME
+export REQUIRES_ROOT
+export SYSTEM_SERVICE
+	
+export PREFIX
+	
+export NGINX_CONF_DIR
+export NGINX_CONF
+export REDIS_CONF
+export SERVER_ROOT
+export CLIENT_ROOT
+	
+export WEB_USER
+export WEB_GROUP
+./os.sh
+
+===== ./os.sh =====
+#!/bin/sh
+
+PLATFORM="unknown"
+
+KERNEL="$(uname -s 2>/dev/null)"
+
+case "$KERNEL" in
+
+FreeBSD)
+    PLATFORM="freebsd"
+    ;;
+
+OpenBSD)
+    PLATFORM="openbsd"
+    ;;
+
+Linux)
+
+    if [ -n "$TERMUX_VERSION" ] || [ -d "/data/data/com.termux" ]; then
+        PLATFORM="termux"
+
+    elif [ -f /etc/os-release ]; then
+        . /etc/os-release
+
+        case "$ID" in
+            debian)
+                PLATFORM="debian"
+                ;;
+
+            ubuntu)
+                PLATFORM="ubuntu"
+                ;;
+
+            alpine)
+                PLATFORM="alpine"
+                ;;
+
+            arch)
+                PLATFORM="arch"
+                ;;
+
+            *)
+                echo "Unsupported Linux distribution: $ID" >&2
+                exit 2
+                ;;
+        esac
+
+    else
+        echo "Unknown Linux system" >&2
+        exit 2
+    fi
+
+    ;;
+
+Darwin)
+    echo "Darwin/macOS is detected but unsupported" >&2
+    exit 2
+    ;;
+
+NetBSD)
+    echo "NetBSD is detected but unsupported" >&2
+    exit 2
+    ;;
+
+*)
+    echo "Unknown kernel: $KERNEL" >&2
+    exit 2
+    ;;
+
+esac
+
+echo "$PLATFORM"
+./install.sh
+
+===== ./install.sh =====
+#!/bin/sh
+
+# =============================================================================
+# Object hub installer
+# Author - MIOBOMB (2026)
+#
+# Его цель настолько простая насколько это вообще возможно:
+# Быть портируемым и сделать процесс установки dev среды object hub
+# настолько простым, насколько это возможно.
+#
+# Список поддерживаемых платформ.
+# Dev:
+# - Freebsd
+#
+# В планах:
+# - Freebsd (prod)
+# - Debian stable (dev/prod)
+# - Termux (dev)
+# - OpenBSD (dev/prod)
+# - Arch linux (dev)
+# - Darwin (АКА MacOS, dev)
+# - NetBSD (dev)
+#
+# Что точно не буду делать:
+# - Windows (используйте WSL или виртуалки)
+# - Gentoo (вы и сами справитесь)
+# - TempleOS (ну, вы сами понимаете)
+# - HaikuOS (если там есть наш веб стек я передумаю)
+#
+# Когда эти планы воплотятся в жизнь - хер знает
+# Может через 2-3 года
+# А может я словлю гиперфикс и зафигачу всё сразу за неделю
+# XXX: я не буду делать прод пока не начнётся ещё один переезд
+# на какой то другой сервер
+#
+# =============================================================================
+
+# =============================================================================
+# КОНФИГ РАСПОЛОЖЕН НИЖЕ:
+DOMAIN_NAME="_"
+DB_NAME="ojhub"
+DB_USER="ojhub"
+DB_PASSWORD="localhost"
+# =============================================================================
+
+echo "[WARN] this script need to run into clean system (like new container) as root"
+
+SCRDIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+PLATFORM="$("$SCRDIR/os.sh")"
+LOG_FILE="$SCRDIR/log.txt"
+
+#echo "Detected: $PLATFORM"
+
+case "$PLATFORM" in
+    freebsd)
+        . "$SCRDIR/prof/freebsd.sh"
+        ;;
+
+	# TODO: захуярить когда нибуть
+    debian|ubuntu)
+        . "$SCRDIR/prof/debian.sh"
+        ;;
+
+	# TODO: захуярить сразу после 100% готовности
+	termux)
+		. "$SCRDIR/prof/termux.sh"
+		;;
+
+    *)
+        echo "Unsupported platform"
+        exit 1
+        ;;
+esac
+
+echo
+echo "Object Hub installation configuration"
+echo "Press Enter to use the default value."
+echo
+
+# DOMAIN ======================================================================
+printf "Domain name [%s]: " "$DOMAIN_NAME"
+read INPUT_DOMAIN
+	
+if [ -n "$INPUT_DOMAIN" ]; then
+    DOMAIN_NAME="$INPUT_DOMAIN"
+fi
+
+# ROOT FOLDER =================================================================
+printf "Project root [%s]: " "$PROJECT_ROOT"
+read INPUT_PROJECT_ROOT
+	
+if [ -n "$INPUT_PROJECT_ROOT" ]; then
+    PROJECT_ROOT="$INPUT_PROJECT_ROOT"
+fi
+
+# DB NAME =====================================================================
+printf "Database name [%s]: " "$DB_NAME"
+read INPUT_DB_NAME
+	
+if [ -n "$INPUT_DB_NAME" ]; then
+    DB_NAME="$INPUT_DB_NAME"
+fi
+
+# DB USER =====================================================================
+printf "Database user [%s]: " "$DB_USER"
+read INPUT_DB_USER
+	
+if [ -n "$INPUT_DB_USER" ]; then
+    DB_USER="$INPUT_DB_USER"
+fi
+
+# DB PASSWD ===================================================================
+printf "Database password [%s]: " "$DB_PASSWORD"
+read INPUT_DB_PASSWORD
+	
+if [ -n "$INPUT_DB_PASSWORD" ]; then
+    DB_PASSWORD="$INPUT_DB_PASSWORD"
+fi
+
+CLIENT_ROOT="$PROJECT_ROOT/$CLIENT_ROOT"
+SERVER_ROOT="$PROJECT_ROOT/$SERVER_ROOT"
+
+export DOMAIN_NAME
+export PROJECT_ROOT
+export CLIENT_ROOT
+export SERVER_ROOT
+
+echo
+echo "Configuration:"
+echo "  Domain:       $DOMAIN_NAME"
+echo "  Project root: $PROJECT_ROOT"
+echo "  Client root:  $CLIENT_ROOT"
+echo "  Server root:  $SERVER_ROOT"
+echo "  Database name:  $DB_NAME"
+echo "  Database username:  $DB_USER"
+echo
+
+exit 1;
+
+. "$SCRDIR/packages.sh"
+. "$SCRDIR/git_clone.sh"
+. "$SCRDIR/nginx_cfg.sh"
+. "$SCRDIR/redis_cfg.sh"
+#. "$SCRDIR/database.sh"
+#FIXME: да сделай ты блять базу данных у тебя скрипт пылится почти 2 месяца только изза неё блять
+
+echo "maybe done lol";
+./redis_cfg.sh
+
+===== ./redis_cfg.sh =====
+#!/bin/sh
+echo "Configuring redis..."
+
+sed -i '' -e "s|^save .*|save \"\"|" -e "s|^appendonly .*|appendonly no|" "$REDIS_CONF"
+
+service_enable "$SERVICE_REDIS"
+service_start "$SERVICE_REDIS"
+
+echo "redis configured"

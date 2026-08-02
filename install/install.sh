@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ========================================
+# =============================================================================
 # Object hub installer
 # Author - MIOBOMB (2026)
 #
@@ -14,9 +14,9 @@
 #
 # В планах:
 # - Freebsd (prod)
-# - OpenBSD (dev/prod)
 # - Debian stable (dev/prod)
 # - Termux (dev)
+# - OpenBSD (dev/prod)
 # - Arch linux (dev)
 # - Darwin (АКА MacOS, dev)
 # - NetBSD (dev)
@@ -33,31 +33,37 @@
 # XXX: я не буду делать прод пока не начнётся ещё один переезд
 # на какой то другой сервер
 #
-# ========================================
+# =============================================================================
 
-# ========================================
+# =============================================================================
 # КОНФИГ РАСПОЛОЖЕН НИЖЕ:
 DOMAIN_NAME="_"
-# ========================================
+DB_NAME="ojhub"
+DB_USER="ojhub"
+DB_PASSWORD="localhost"
+# =============================================================================
 
-PLATFORM="$(./os.sh)"
-LOG_FILE="./log.txt"
+echo "[WARN] this script need to run into clean system (like new container) as root"
 
-echo "Detected: $PLATFORM"
+SCRDIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+PLATFORM="$("$SCRDIR/os.sh")"
+LOG_FILE="$SCRDIR/log.txt"
+
+#echo "Detected: $PLATFORM"
 
 case "$PLATFORM" in
     freebsd)
-        . ./prof/freebsd.sh
+        . "$SCRDIR/prof/freebsd.sh"
         ;;
 
 	# TODO: захуярить когда нибуть
     debian|ubuntu)
-        . ./prof/debian.sh
+        . "$SCRDIR/prof/debian.sh"
         ;;
 
 	# TODO: захуярить сразу после 100% готовности
 	termux)
-		. ./prof/termux.sh
+		. "$SCRDIR/prof/termux.sh"
 		;;
 
     *)
@@ -66,9 +72,76 @@ case "$PLATFORM" in
         ;;
 esac
 
-# echo "Platform loaded"
-. ./packages.sh
-. ./nginx_cfg.sh
-. ./redis_cfg.sh
+echo
+echo "Object Hub installation configuration"
+echo "Press Enter to use the default value."
+echo
+
+# DOMAIN ======================================================================
+printf "Domain name [%s]: " "$DOMAIN_NAME"
+read INPUT_DOMAIN
+	
+if [ -n "$INPUT_DOMAIN" ]; then
+    DOMAIN_NAME="$INPUT_DOMAIN"
+fi
+
+# ROOT FOLDER =================================================================
+printf "Project root [%s]: " "$PROJECT_ROOT"
+read INPUT_PROJECT_ROOT
+	
+if [ -n "$INPUT_PROJECT_ROOT" ]; then
+    PROJECT_ROOT="$INPUT_PROJECT_ROOT"
+fi
+
+# DB NAME =====================================================================
+printf "Database name [%s]: " "$DB_NAME"
+read INPUT_DB_NAME
+	
+if [ -n "$INPUT_DB_NAME" ]; then
+    DB_NAME="$INPUT_DB_NAME"
+fi
+
+# DB USER =====================================================================
+printf "Database user [%s]: " "$DB_USER"
+read INPUT_DB_USER
+	
+if [ -n "$INPUT_DB_USER" ]; then
+    DB_USER="$INPUT_DB_USER"
+fi
+
+# DB PASSWD ===================================================================
+printf "Database password [%s]: " "$DB_PASSWORD"
+read INPUT_DB_PASSWORD
+	
+if [ -n "$INPUT_DB_PASSWORD" ]; then
+    DB_PASSWORD="$INPUT_DB_PASSWORD"
+fi
+
+CLIENT_ROOT="$PROJECT_ROOT/$CLIENT_ROOT"
+SERVER_ROOT="$PROJECT_ROOT/$SERVER_ROOT"
+
+export DOMAIN_NAME
+export PROJECT_ROOT
+export CLIENT_ROOT
+export SERVER_ROOT
+
+echo
+echo "Configuration:"
+echo "  Domain:       $DOMAIN_NAME"
+echo "  Project root: $PROJECT_ROOT"
+echo "  Client root:  $CLIENT_ROOT"
+echo "  Server root:  $SERVER_ROOT"
+echo "  Database name:  $DB_NAME"
+echo "  Database username:  $DB_USER"
+echo
+
+exit 1;
+
+. "$SCRDIR/packages.sh"
+. "$SCRDIR/git_clone.sh"
+. "$SCRDIR/nginx_cfg.sh"
+. "$SCRDIR/redis_cfg.sh"
+. "$SCRDIR/database.sh"
+#FIXME: да сделай ты блять базу данных у тебя скрипт пылится почти 2 месяца только изза неё блять
 
 echo "maybe done lol";

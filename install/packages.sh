@@ -2,5 +2,6 @@
 
 pkg_update
 echo "Installing packages..."
-pkg_install $PACKAGE_NGINX $PACKAGE_REDIS $PACKAGE_MARIADB $PACKAGE_NODE $PACKAGE_NPM $PACKAGE_GIT >> "$LOG_FILE" 2>&1
+# FIXME: добавить в главный скрипт пункт "you have configured mysql service [yes/no]", и если yes то не ставить mariadb
+pkg_install $PACKAGE_NGINX $PACKAGE_REDIS $PACKAGE_GO $PACKAGE_GIT >> "$LOG_FILE" 2>&1
 echo "OK"
